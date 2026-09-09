@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="Yagnik Shaparia portrait placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12151A"/>
+      <stop offset="100%" stop-color="#0A0B0D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="70%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#C9F24D" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#C9F24D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#glow)"/>
+  <circle cx="400" cy="430" r="150" fill="none" stroke="#C9F24D" stroke-opacity="0.35" stroke-width="2"/>
+  <text x="400" y="470" text-anchor="middle" font-family="'Space Grotesk', ui-sans-serif, system-ui, sans-serif" font-size="132" font-weight="700" fill="#C9F24D" letter-spacing="6">YS</text>
+  <text x="400" y="640" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="26" fill="#EDEEF0" letter-spacing="4">YAGNIK SHAPARIA</text>
+  <text x="400" y="686" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="17" fill="#7E838C" letter-spacing="3">.NET &#183; ANGULAR &#183; AWS</text>
+</svg>

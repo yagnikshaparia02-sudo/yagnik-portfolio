@@ -93,7 +93,7 @@
         <div style="position:relative">
           <div style="position:absolute;inset:-14px;border-radius:26px;background:radial-gradient(circle at 70% 20%,rgba(201,242,77,0.16),rgba(201,242,77,0) 66%);pointer-events:none"></div>
           <div style="position:relative;aspect-ratio:4/5;border-radius:20px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;background:#0F1114">
-            <image-slot id="yagnik-portrait" shape="rect" placeholder="Drop your portrait photo here"></image-slot>
+            <image-slot id="yagnik-portrait" shape="rect" fit="cover" src="./assets/yagnik-portrait.jpg" placeholder="Drop your portrait photo here"></image-slot>
           </div>
           <div style="position:absolute;left:16px;bottom:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;pointer-events:none">
             <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#EDEEF0;background:rgba(8,9,10,0.72);backdrop-filter:blur(6px);padding:7px 11px;border-radius:999px;border:1px solid rgba(255,255,255,0.12)">.NET &middot; Angular &middot; AWS</span>
@@ -911,6 +911,20 @@ class Component extends DCLogic {
     };
   }
 }
+</script>
+<script>
+  // The portrait is served as a real file in ./assets so it shows on GitHub
+  // Pages (the design-canvas sidecar is not published there). If the photo
+  // has not been uploaded yet, fall back to the committed SVG placeholder.
+  (function () {
+    var slot = document.getElementById('yagnik-portrait');
+    if (!slot) return;
+    var src = slot.getAttribute('src');
+    if (!src) return;
+    var probe = new Image();
+    probe.onerror = function () { slot.setAttribute('src', './assets/yagnik-portrait.svg'); };
+    probe.src = src;
+  })();
 </script>
 </body>
 </html>
