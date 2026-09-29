@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio responsive checks</title>
+<style>
+*{box-sizing:border-box}body{font:14px system-ui;margin:0;background:#202429;color:#eee}header{position:sticky;top:0;z-index:2;background:#202429;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}button,select{font:inherit;padding:8px;border-radius:6px;border:1px solid #69717d}button{cursor:pointer}#stage{padding:12px;overflow:auto}iframe{display:block;border:0;background:#08090a;margin:auto;max-width:none}pre{white-space:pre-wrap;padding:0 16px 16px;margin:0;font:12px/1.7 monospace}#status{color:#c9f24d}
+</style>
+</head>
+<body>
+<header>
+<label>Page <select id="page"><option>index.html</option><option>Resume.dc.html</option><option>Experience.dc.html</option></select></label>
+<label>Width <select id="width"><option>320</option><option>360</option><option>375</option><option>390</option><option>430</option><option>600</option><option>767</option><option>768</option><option>820</option><option>1024</option><option>1099</option><option>1100</option><option>1280</option><option selected>1440</option><option>1920</option><option>2560</option></select></label>
+<button id="run" type="button">Run all checks</button><span id="status" role="status">Ready</span>
+</header>
+<div id="stage"><iframe id="preview" title="Portfolio preview" width="1440" height="900" src="../index.html"></iframe></div>
+<pre id="results"></pre>
+<script>
+'use strict';
+const frame=document.querySelector('#preview'), pageSelect=document.querySelector('#page'), widthSelect=document.querySelector('#width'), results=document.querySelector('#results'), status=document.querySelector('#status');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const report=[];
+function setWidth(width){frame.width=String(width);frame.style.width=width+'px';frame.height=width<768?'812':'900';}
+async function ready(){
+ for(let n=0;n<120;n++){if(frame.contentDocument?.querySelector('[data-ui-ready="true"]'))return;await wait(250);}
+ throw Error('Page failed to initialize');
+}
+pageSelect.onchange=()=>{frame.src='../'+pageSelect.value;};
+widthSelect.onchange=()=>setWidth(Number(widthSelect.value));
+function record(label,pass,detail=''){report.push({label,pass,detail});results.textContent=report.map(r=>`${r.pass?'PASS':'FAIL'} ${r.label}${r.detail?' — '+r.detail:''}`).join('\n');}
+document.querySelector('#run').onclick=async function(){
+ this.disabled=true;report.length=0;results.textContent='';
+ try{
+ for(const page of ['index.html','Resume.dc.html','Experience.dc.html']){
+   frame.src='../'+page;pageSelect.value=page;await wait(350);await ready();
+   for(const width of [320,360,375,390,430,600,767,768,820,1024,1099,1100,1280,1440,1920,2560]){
+     status.textContent=`Checking ${page} at ${width}px`;setWidth(width);widthSelect.value=String(width);await wait(180);
+     const doc=frame.contentDocument,win=frame.contentWindow,viewport=doc.documentElement.clientWidth;
+     const actual=Math.max(doc.documentElement.scrollWidth,doc.body.scrollWidth);
+     const header=doc.querySelector('.header-inner');
+     const bad=[...doc.querySelectorAll('main a,main button,main summary,main h1,main h2,main h3,main p')].filter(el=>{
+       if(el.closest('.marquee')||!el.getClientRects().length)return false;
+       const r=el.getBoundingClientRect();return r.right>viewport+1||r.left< -1;
+     }).slice(0,4).map(el=>el.textContent.trim().slice(0,45));
+     const photo=doc.querySelector('.hero-portrait');
+     const photoOK=!photo||(win.getComputedStyle(photo).display!=='none')===(width>=768);
+     const headerOK=header.getBoundingClientRect().height<100 && header.scrollWidth<=viewport+1;
+     record(`${page} ${width}px`,actual<=viewport+1&&photoOK&&headerOK&&!bad.length,`viewport ${viewport}, document ${actual}, photo ${photo?win.getComputedStyle(photo).display:'n/a'}${bad.length?', overflow: '+bad.join(' | '):''}${!headerOK?', header overflow':''}`);
+   }
+   setWidth(375);await wait(200);
+   const doc=frame.contentDocument,win=frame.contentWindow,menu=doc.querySelector('.menu-toggle'),nav=doc.querySelector('.site-nav');
+   menu.click();await wait(100);const opened=menu.getAttribute('aria-expanded')==='true'&&win.getComputedStyle(nav).display!=='none';
+   doc.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(100);
+   record(`${page} mobile menu`,opened&&menu.getAttribute('aria-expanded')==='false'&&doc.activeElement===menu,'opens, Escape closes and restores focus');
+   const motion=doc.querySelector('.motion-toggle');if(doc.documentElement.dataset.motion!=='reduced')motion.click();await wait(100);
+   const role=doc.querySelector('[data-role]');const roleBefore=role?.textContent;await wait(300);
+   record(`${page} pause motion`,doc.documentElement.dataset.motion==='reduced'&&(!role||role.textContent===roleBefore));
+   if(motion.getAttribute('aria-disabled')!=='true'&&doc.documentElement.dataset.motion==='reduced')motion.click();
+   if(page==='index.html'){
+     const buttons=[...doc.querySelectorAll('#principles button')];
+     for(let i=0;i<buttons.length;i++){
+       buttons[i].click();await wait(120);
+       const visible=[...doc.querySelectorAll('#principles .motion-card')].filter(el=>el.getClientRects().length).length;
+       record('Principles: '+buttons[i].textContent,visible===(i===0?12:4)&&buttons[i].getAttribute('aria-pressed')==='true',visible+' visible cards');
+     }
+     buttons[0].click();
+     const faq=doc.querySelector('#faq details');faq.querySelector('summary').click();record('FAQ expands',faq.open);faq.querySelector('summary').click();
+   }
+ }
+ }catch(e){record('Test runner',false,e.message);}
+ const failed=report.filter(r=>!r.pass).length;
+ status.textContent=`${report.length-failed}/${report.length} passed${failed?' — '+failed+' failures':''}`;
+ this.disabled=false;frame.src='../index.html';pageSelect.value='index.html';setWidth(390);widthSelect.value='390';
+};
+</script>
+</body>
+</html>
