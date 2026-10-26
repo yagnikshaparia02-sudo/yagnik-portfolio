@@ -61,7 +61,7 @@
 
     const role = root.querySelector('[data-role]');
     if (role) {
-      const words = ['.NET Backend Engineer', 'Angular Developer', 'API Integration Specialist', 'Cloud & AWS Engineer'];
+      const words = ['an SDE-3 at Cybotik', 'a Full-Stack Engineer', 'a .NET Backend Engineer', 'an API Integration Specialist'];
       let timer, word = 0, length = words[0].length, deleting = false;
       function type() {
         if (reduced || document.hidden || options.typeAnimation === false) return;
